@@ -29,6 +29,7 @@ class CellMatrix
         void step(int id);
 		std::vector<int> getSurroundingColors(int id);
         int getCellColor(int id);
+        void setCellColor(int id, int c);
 		void setCellsExploreMode(bool val);
 		void printCells();
         void updateColors();

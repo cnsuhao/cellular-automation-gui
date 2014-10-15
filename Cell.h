@@ -29,6 +29,7 @@ class Cell: public Avatar
 		~Cell();
 
 		int getColor() const;
+        void setColor(int c);
 		void updateColor();
 		void setLearningMode(Agent::Mode mode);
 

@@ -4,8 +4,9 @@
 #include "button.h"
 
 Button::Button(QWidget *parent) :
-    QPushButton(parent), mycolor(0)
+    QPushButton(parent), mycolor(0), inputFlag(false)
 {
+    connect(this, SIGNAL(clicked()), SLOT(onClick()));
 }
 
 void Button::paintEvent(QPaintEvent *event)
@@ -29,4 +30,26 @@ void Button::paintEvent(QPaintEvent *event)
 void Button::setColor(int c)
 {
     mycolor = c;
+}
+
+int Button::getColor() const
+{
+    return mycolor;
+}
+
+bool Button::isInputColor()
+{
+    bool tmp = inputFlag;
+    inputFlag = false;     // reset
+    return tmp;
+}
+
+void Button::onClick()
+{
+    if (mycolor == 1)
+        mycolor = 0;
+    else
+        mycolor = 1;
+
+    inputFlag = true;
 }

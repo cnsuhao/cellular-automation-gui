@@ -78,6 +78,11 @@ int Cell::getColor() const
 	return color;
 }
 
+void Cell::setColor(int c)
+{
+    color = c;
+}
+
 void Cell::updateColor()
 {
 	color = rotate_color;

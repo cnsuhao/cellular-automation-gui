@@ -77,35 +77,23 @@ MainWindow::MainWindow(int w, int h, QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete matrix;
-
-    QList<CalThread *>::iterator tit;
-    for (tit = threads.begin(); tit != threads.end(); ++ tit)
-    {
-        (*tit)->terminate();
-        (*tit)->wait(1000);
-    }
 }
 
 void MainWindow::drawButtons()
 {
-    qDebug() << "--------------------- drawButtons";
-    unsigned long start, end;
-    start = getCurrentTime();
-
     unsigned int i;
     Button *button;
     for (i = 0; i < width * height; i++)
     {
-        int color = matrix->getCellColor(i);
         button = buttons[i];
-        button->setColor(color);
+        if (button->isInputColor())     // set cell color to button if input
+            matrix->setCellColor(i, button->getColor());
+        else    // set button color to cell
+            button->setColor(matrix->getCellColor(i));
     }
 
     statusBar->showMessage(QString("step: %1").arg(stepCounter));
     this->repaint();
-
-    end = getCurrentTime();
-    qDebug() << "+++++++++++++++++++++ drawButtons done" << "delta time: " << end - start;
 }
 
 void MainWindow::threadWorkDone()
@@ -138,4 +126,17 @@ unsigned long MainWindow::getCurrentTime()
     struct timeb tb;
     ftime(&tb);
     return 1000 * tb.time + tb.millitm;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event);
+    // terminate & delete all threads
+    QList<CalThread *>::iterator tit;
+    for (tit = threads.begin(); tit != threads.end(); ++ tit)
+    {
+        (*tit)->quit();
+        (*tit)->wait(100);
+        delete (*tit);
+    }
 }

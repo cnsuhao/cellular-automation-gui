@@ -111,6 +111,11 @@ int CellMatrix::getCellColor(int id)
     return cells[id]->getColor();
 }
 
+void CellMatrix::setCellColor(int id, int c)
+{
+    cells[id]->setColor(c);
+}
+
 std::vector<int> CellMatrix::getNeighbours(int id)
 {
 	std::vector<int> neighs;

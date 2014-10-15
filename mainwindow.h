@@ -41,6 +41,7 @@ private:
 
     void drawButtons();
     unsigned long getCurrentTime();
+    void closeEvent(QCloseEvent *);
 };
 
 #endif // WIDGET_H

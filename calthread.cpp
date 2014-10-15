@@ -15,13 +15,9 @@ void CalThread::run()
         // wait for resume signal
         mainwindow->stepMutex.lockForRead();
         while (mainwindow->stepCounter != myStepCounter + 1)
-        {
-            qDebug() << "thread pause, my counter:" << myStepCounter << "main counter: " << mainwindow->stepCounter;
             mainwindow->stepCond.wait(&mainwindow->stepMutex);
-        }
         mainwindow->stepMutex.unlock();
 
-        qDebug() << "thread resume";
         // done the job
         int i;
         for (i = startid; i < endid; i++)
