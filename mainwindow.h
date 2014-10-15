@@ -6,6 +6,7 @@
 class QPushButton;
 class CellMatrix;
 class QStatusBar;
+class CalThread;
 
 class MainWindow : public QMainWindow
 {
@@ -15,18 +16,22 @@ public:
     MainWindow(int w, int h, QWidget *parent = 0);
     ~MainWindow();
 
+    void start();
+
+public slots:
+    void threadWorkDone();
+
 private slots:
-    void updateColor();
+    void refreshColor();
 
 private:
     int width;
     int height;
     QList<QPushButton *> buttons;
     CellMatrix *matrix;
-    QTimer *timer;
     QStatusBar *statusBar;
-
-    void keyPressEvent(QKeyEvent *event);
+    QList<CalThread *> threads;
+    unsigned long threadCounter;
 };
 
 #endif // WIDGET_H

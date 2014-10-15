@@ -33,6 +33,11 @@ CellMatrix::~CellMatrix()
 	}
 }
 
+void CellMatrix::step(int id)
+{
+    cells[id]->step();
+}
+
 void CellMatrix::step()
 {
 	std::vector<Cell*>::iterator cit;
@@ -40,12 +45,15 @@ void CellMatrix::step()
 	{
 		(*cit)->step();
 	}
+}
 
-	// update colors
-	for (cit = cells.begin(); cit != cells.end(); ++cit)
-	{
-		(*cit)->updateColor();
-	}
+void CellMatrix::updateColors()
+{
+    std::vector<Cell*>::iterator cit;
+    for (cit = cells.begin(); cit != cells.end(); ++cit)
+    {
+        (*cit)->updateColor();
+    }
 }
 
 void CellMatrix::printCells()
