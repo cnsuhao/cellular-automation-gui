@@ -10,12 +10,15 @@
  *	
  ************************************************/
 
+#include <QTime>
 #include "CellMatrix.h"
 #include "Cell.h"
 
 CellMatrix::CellMatrix(int w, int h) :
 		width(w), height(h)
 {
+    qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));      // init rand seed
+
 	int i;
 	for (i = 0; i < width * height; i++)
 	{

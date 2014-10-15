@@ -6,7 +6,7 @@
 #include <QWaitCondition>
 #include "calthread.h"
 
-class QPushButton;
+class Button;
 class CellMatrix;
 class QStatusBar;
 class CalThread;
@@ -29,7 +29,7 @@ public slots:
 private:
     unsigned int width;
     unsigned int height;
-    QList<QPushButton *> buttons;
+    QList<Button *> buttons;
     CellMatrix *matrix;
     QStatusBar *statusBar;
     QList<CalThread *> threads;

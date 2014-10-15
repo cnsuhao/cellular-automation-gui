@@ -17,14 +17,16 @@ SOURCES += main.cpp\
         Cell.cpp \
         CellMatrix.cpp \
     mainwindow.cpp \
-    calthread.cpp
+    calthread.cpp \
+    button.cpp
 
 HEADERS  += \ 
         Cell.h \
         CellMatrix.h \
     config.h \
     mainwindow.h \
-    calthread.h
+    calthread.h \
+    button.h
         
 unix|macx|win32: LIBS += -lgamcs
 win32: LIBS += -lsqlite3    # windows still needs sqlite3.lib?

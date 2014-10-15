@@ -1,6 +1,5 @@
 #include <QWidget>
 #include <QGridLayout>
-#include <QPushButton>
 #include <QKeyEvent>
 #include <QDebug>
 #include <QStatusBar>
@@ -9,6 +8,7 @@
 #include "CellMatrix.h"
 #include "config.h"
 #include "calthread.h"
+#include "button.h"
 
 MainWindow::MainWindow(int w, int h, QWidget *parent)
     : QMainWindow(parent), width(w), height(h), matrix(NULL), statusBar(NULL), threadCounter(0), stepCounter(0)
@@ -27,7 +27,7 @@ MainWindow::MainWindow(int w, int h, QWidget *parent)
     QSizePolicy buttonSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     for (i = 0; i < width * height; i++)
     {
-        QPushButton *button = new QPushButton(this);
+        Button *button = new Button(centralWidget);
         button->setSizePolicy(buttonSizePolicy);
         buttons.append(button);
     }
@@ -91,19 +91,19 @@ void MainWindow::drawButtons()
     qDebug() << "--------------------- drawButtons";
     unsigned long start, end;
     start = getCurrentTime();
+
     unsigned int i;
-    QPushButton *button;
+    Button *button;
     for (i = 0; i < width * height; i++)
     {
         int color = matrix->getCellColor(i);
         button = buttons[i];
-        if (color == 0)
-            button->setStyleSheet("background-color: black;");
-        else
-            button->setStyleSheet("background-color: white;");
+        button->setColor(color);
     }
 
     statusBar->showMessage(QString("step: %1").arg(stepCounter));
+    this->repaint();
+
     end = getCurrentTime();
     qDebug() << "+++++++++++++++++++++ drawButtons done" << "delta time: " << end - start;
 }

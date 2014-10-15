@@ -12,11 +12,12 @@
 
 #include <vector>
 #include <math.h>
+#include <QtGlobal>
 #include "Cell.h"
 #include "CellMatrix.h"
 
 Cell::Cell(int i, CellMatrix *mat) :
-		id(i), color(0), rotate_color(0), myagent(NULL), matrix(mat), numBlackNeigh(
+        id(i), color(qrand() % 2), rotate_color(0), myagent(NULL), matrix(mat), numBlackNeigh(
 				0), numWhiteNeigh(0)
 {
 	myagent = new CSOSAgent(id, 0.9, 0.01);
