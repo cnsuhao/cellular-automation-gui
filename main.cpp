@@ -3,7 +3,7 @@
 #include <QSettings>
 #include "config.h"
 
-int g_exploreCount, g_width, g_height, g_threads;
+unsigned int g_exploreCount, g_width, g_height, g_threads;
 
 int main(int argc, char *argv[])
 {
@@ -12,15 +12,13 @@ int main(int argc, char *argv[])
     QSettings settings("./ca.conf", QSettings::IniFormat);
     QString key;
     key = "ExploreCount";
-    g_exploreCount = settings.value(key, 10000).toInt();
+    g_exploreCount = settings.value(key, 10000).toUInt();
     key = "Width";
-    g_width = settings.value(key, 5).toInt();
+    g_width = settings.value(key, 5).toUInt();
     key = "Height";
-    g_height = settings.value(key, 5).toInt();
+    g_height = settings.value(key, 5).toUInt();
     key = "Threads";
-    g_threads = settings.value(key, 1).toInt();
-    if (g_threads <= 0)
-        g_threads = 1;
+    g_threads = settings.value(key, 1).toUInt();
 
     MainWindow w(g_width, g_height);
     w.show();

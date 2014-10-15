@@ -1,9 +1,10 @@
 #include <QDebug>
 #include "calthread.h"
 #include "CellMatrix.h"
+#include "mainwindow.h"
 
-CalThread::CalThread(CellMatrix *mat, int st, int ed, QObject *parent) :
-    matrix(mat), startid(st), endid(ed), resumed(true), QThread(parent)
+CalThread::CalThread(int st, int ed, MainWindow *mw, QObject *parent) :
+     QThread(parent), startid(st), endid(ed), mainwindow(mw), myStepCounter(0)
 {
 }
 
@@ -12,30 +13,24 @@ void CalThread::run()
     while (true)
     {
         // wait for resume signal
-        resumedMutex.lock();
-        while (!resumed)
+        mainwindow->stepMutex.lockForRead();
+        while (mainwindow->stepCounter != myStepCounter + 1)
         {
-            qDebug() << "thread pause";
-            resumedCond.wait(&resumedMutex);
+            qDebug() << "thread pause, my counter:" << myStepCounter << "main counter: " << mainwindow->stepCounter;
+            mainwindow->stepCond.wait(&mainwindow->stepMutex);
         }
-        resumed = false;
-        resumedMutex.unlock();
+        mainwindow->stepMutex.unlock();
 
         qDebug() << "thread resume";
         // done the job
         int i;
         for (i = startid; i < endid; i++)
-            matrix->step(i);
+            mainwindow->matrix->step(i);
 
         // report complete
         emit workDone();
-    }
-}
 
-void CalThread::resume()
-{
-    resumedMutex.lock();
-    resumed = true;
-    resumedCond.wakeAll();
-    resumedMutex.unlock();
+        // update my counter
+        myStepCounter++;
+    }
 }

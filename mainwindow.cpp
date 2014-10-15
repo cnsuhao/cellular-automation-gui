@@ -4,13 +4,14 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QStatusBar>
+#include <sys/timeb.h>
 #include "mainwindow.h"
 #include "CellMatrix.h"
 #include "config.h"
 #include "calthread.h"
 
 MainWindow::MainWindow(int w, int h, QWidget *parent)
-    : width(w), height(h), matrix(NULL), statusBar(NULL), threadCounter(0), QMainWindow(parent)
+    : QMainWindow(parent), width(w), height(h), matrix(NULL), statusBar(NULL), threadCounter(0), stepCounter(0)
 {
     matrix = new CellMatrix(width, height);
     matrix->setCellsExploreMode(true);      // start in explore mode
@@ -22,7 +23,7 @@ MainWindow::MainWindow(int w, int h, QWidget *parent)
     QWidget *centralWidget = new QWidget(this);
     this->setCentralWidget(centralWidget);
 
-    int i;
+    unsigned int i;
     QSizePolicy buttonSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     for (i = 0; i < width * height; i++)
     {
@@ -32,7 +33,7 @@ MainWindow::MainWindow(int w, int h, QWidget *parent)
     }
 
     QGridLayout *layout = new QGridLayout(centralWidget);
-    int j;
+    unsigned int j;
     for (i = 0; i < height; i++ )
     {
         for (j = 0; j < width; j++)
@@ -48,7 +49,7 @@ MainWindow::MainWindow(int w, int h, QWidget *parent)
     this->setStatusBar(statusBar);
 
     // create threads
-    int cellsNum = width * height;
+    unsigned int cellsNum = width * height;
     if (cellsNum < g_threads)
         g_threads = cellsNum;
     int cellsPerThread = cellsNum / g_threads;
@@ -56,18 +57,19 @@ MainWindow::MainWindow(int w, int h, QWidget *parent)
     for (i = 0; i < g_threads - 1; i++)
     {
         qDebug() << "thread " << i << "start: " << start << "end: " << start + cellsPerThread;
-        CalThread *thread = new CalThread(matrix, start, start + cellsPerThread, this);
+        CalThread *thread = new CalThread(start, start + cellsPerThread, this, this);
         connect(thread, SIGNAL(workDone()), this, SLOT(threadWorkDone()));
         threads.append(thread);
         start += cellsPerThread;
     }
     // give the remaining cells to the last one
     qDebug() << "thread " << i << "start: " << start << "end: " << cellsNum;
-    CalThread *thread = new CalThread(matrix, start, cellsNum, this);
+    CalThread *thread = new CalThread(start, cellsNum, this, this);
     connect(thread, SIGNAL(workDone()), this, SLOT(threadWorkDone()));
     threads.append(thread);
 
     // start all threads
+    stepCounter = 1;
     for (i = 0; i < g_threads; i++)
         threads[i]->start();
 }
@@ -84,20 +86,12 @@ MainWindow::~MainWindow()
     }
 }
 
-void MainWindow::refreshColor()
+void MainWindow::drawButtons()
 {
-    qDebug() << "------------------------- refresh color";
-    static unsigned long count = 0;
-    if (count++ == g_exploreCount)
-    {
-        matrix->setCellsExploreMode(false);
-        this->setWindowTitle("CA - Online");
-    }
-
-    // update color
-    matrix->updateColors();
-    // draw cells
-    int i;
+    qDebug() << "--------------------- drawButtons";
+    unsigned long start, end;
+    start = getCurrentTime();
+    unsigned int i;
     QPushButton *button;
     for (i = 0; i < width * height; i++)
     {
@@ -109,21 +103,39 @@ void MainWindow::refreshColor()
             button->setStyleSheet("background-color: white;");
     }
 
-    statusBar->showMessage(QString("step: %1").arg(count));
+    statusBar->showMessage(QString("step: %1").arg(stepCounter));
+    end = getCurrentTime();
+    qDebug() << "+++++++++++++++++++++ drawButtons done" << "delta time: " << end - start;
 }
 
 void MainWindow::threadWorkDone()
 {
-    if (++threadCounter == threads.size())        // calculation is done
+    if (++threadCounter == threads.size())        // one step calculation is done
     {
         threadCounter = 0;
-        refreshColor();
 
-        // resume all threads to calculate the next
-        QList<CalThread *>::iterator tit;
-        for (tit = threads.begin(); tit != threads.end(); ++ tit)
+        matrix->updateColors(); // update colors only, draw later
+
+        // resume threads to calculate the next, no need to wait for the draw
+        // switch to Online mode the counter reaches the threshold
+        if (stepCounter == g_exploreCount)
         {
-            (*tit)->resume();
+            matrix->setCellsExploreMode(false);
+            this->setWindowTitle("CA - Online");
         }
+        stepMutex.lockForWrite();
+        stepCounter++;
+        stepCond.wakeAll();
+        stepMutex.unlock();
+
+        // draw gui after all threads started
+        drawButtons();
     }
+}
+
+unsigned long MainWindow::getCurrentTime()
+{
+    struct timeb tb;
+    ftime(&tb);
+    return 1000 * tb.time + tb.millitm;
 }
