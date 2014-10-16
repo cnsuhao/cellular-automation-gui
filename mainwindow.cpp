@@ -11,7 +11,7 @@
 #include "button.h"
 
 MainWindow::MainWindow(int w, int h, QWidget *parent)
-    : QMainWindow(parent), width(w), height(h), matrix(NULL), statusBar(NULL), threadCounter(0), stepCounter(0)
+    : QMainWindow(parent), width(w), height(h), matrix(NULL), statusBar(NULL), threadCounter(0), stepCounter(0), cur_lmode(0), next_lmode(0)
 {
     matrix = new CellMatrix(width, height);
     matrix->setCellsExploreMode(true);      // start in explore mode
@@ -110,7 +110,24 @@ void MainWindow::threadWorkDone()
         {
             matrix->setCellsExploreMode(false);
             this->setWindowTitle("CA - Online");
+            cur_lmode = next_lmode = 1;
         }
+
+        if (next_lmode != cur_lmode)
+        {
+            cur_lmode = next_lmode;
+            if (cur_lmode == 0)
+            {
+                matrix->setCellsExploreMode(true);
+                this->setWindowTitle("CA - Explore");
+            }
+            else
+            {
+                matrix->setCellsExploreMode(false);
+                this->setWindowTitle("CA - Online");
+            }
+        }
+
         stepMutex.lockForWrite();
         stepCounter++;
         stepCond.wakeAll();
@@ -136,7 +153,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
     for (tit = threads.begin(); tit != threads.end(); ++ tit)
     {
         (*tit)->quit();
-        (*tit)->wait(100);
+        (*tit)->wait(50);
         delete (*tit);
     }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_E)
+        next_lmode = 0;
+    else if (event->key() == Qt::Key_O)
+        next_lmode = 1;
 }

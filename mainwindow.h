@@ -39,9 +39,13 @@ private:
     QReadWriteLock stepMutex;
     QWaitCondition stepCond;
 
+    int cur_lmode;      // 0 explore, 1 online
+    int next_lmode;
+
     void drawButtons();
     unsigned long getCurrentTime();
     void closeEvent(QCloseEvent *);
+    void keyPressEvent(QKeyEvent *event);
 };
 
 #endif // WIDGET_H
