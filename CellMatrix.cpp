@@ -97,9 +97,7 @@ std::vector<int> CellMatrix::getSurroundingColors(int id)
 	std::vector<int>::iterator nit;
 	for (nit = neighs.begin(); nit != neighs.end(); ++nit)
 	{
-		if (*nit == -1)
-			colors.push_back(0);		// black if no cell
-		else
+        if ((*nit) != -1)       // exclude non-existing neigh
 			colors.push_back(cells[*nit]->getColor());
 	}
 

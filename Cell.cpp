@@ -40,9 +40,9 @@ Agent::State Cell::perceiveState()
 	for (cit = colors.begin(), i = 0; cit != colors.end(); ++cit, ++i)
 	{
 		st += (*cit) * pow(2, i);
-		if ((*cit) == 0)
+        if ((*cit) == 0)        // black
 			numBlackNeigh++;
-		else
+        else    // white
 			numWhiteNeigh++;
 	}
 
